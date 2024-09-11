@@ -1,6 +1,6 @@
 from django.urls import path
 
-from app.realty.views import (
+from .views import (
     FlatCreateAPIView,
     FlatListAPIView,
     FlatDetailAPIView,
@@ -10,9 +10,9 @@ from app.realty.views import (
 
 
 urlpatterns = [
-    path('flats/', FlatListAPIView.as_view()),
+    path('flats', FlatListAPIView.as_view()),
+    path('flat/create/', FlatCreateAPIView.as_view()),
     path('flat/<int:flat_id>/', FlatDetailAPIView.as_view()),
-    path('flat_create/', FlatCreateAPIView.as_view()),
-    path('flat_update/<int:flat_id>/', FlatUpdateAPIView.as_view()),
-    path('flat_delete/<int:flat_id>/', FlatDestroyAPIView.as_view()),
+    path('flat/<int:flat_id>/update/', FlatUpdateAPIView.as_view()),
+    path('flat/<int:flat_id>/delete/', FlatDestroyAPIView.as_view()),
 ]

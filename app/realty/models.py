@@ -27,10 +27,10 @@ class Flat(BaseModel):
     area = models.DecimalField(
         max_digits=5, decimal_places=2, blank=False, verbose_name="Площадь"
     )
-    num_of_rooms = models.CharField(
-        max_length=3, choices=NumOfRoomsChoices, verbose_name="Число комнат"
+    rooms_count = models.CharField(
+        max_length=3, blank=False, choices=NumOfRoomsChoices, verbose_name="Число комнат"
     )
-    num_of_wc = models.IntegerField(blank=False, verbose_name="Число санузлов")
+    wc_count = models.IntegerField(blank=False, verbose_name="Число санузлов")
     floor = models.IntegerField(blank=False, verbose_name="Этаж")
     status = models.CharField(
         max_length=3,
