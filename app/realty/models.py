@@ -17,18 +17,18 @@ class Flat(BaseModel):
         BOOKED = "BKD", "Забронирована"
         SOLD = "SLD", "Продана"
 
-    class NumOfRoomsChoices(models.TextChoices):
-        STUDIO = "STU", "Студия"
-        UNO = "1", "1"
-        DOS = "2", "2"
-        TRES = "3", "3"
-        CUATRO = "4", "4"
+    class NumOfRoomsChoices(models.IntegerChoices):
+        STUDIO = 0, "Студия"
+        UNO = 1, "1"
+        DOS = 2, "2"
+        TRES = 3, "3"
+        CUATRO = 4, "4"
 
     area = models.DecimalField(
         max_digits=5, decimal_places=2, blank=False, verbose_name="Площадь"
     )
-    rooms_count = models.CharField(
-        max_length=3, blank=False, choices=NumOfRoomsChoices, verbose_name="Число комнат"
+    rooms_count = models.IntegerField(
+        blank=False, choices=NumOfRoomsChoices, verbose_name="Число комнат"
     )
     wc_count = models.IntegerField(blank=False, verbose_name="Число санузлов")
     floor = models.IntegerField(blank=False, verbose_name="Этаж")
