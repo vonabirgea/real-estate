@@ -16,7 +16,7 @@ class FlatListAPIView(APIView):
     class OutputSerializer(serializers.Serializer):
         id = serializers.IntegerField()
         area = serializers.DecimalField(max_digits=5, decimal_places=2)
-        rooms_count = serializers.CharField()
+        rooms_count = serializers.IntegerField()
         wc_count = serializers.IntegerField()
         floor = serializers.IntegerField()
         status = serializers.CharField()
@@ -34,7 +34,7 @@ class FlatDetailAPIView(RetrieveAPIView):
     class OutputSerializer(serializers.Serializer):
         id = serializers.IntegerField()
         area = serializers.DecimalField(max_digits=5, decimal_places=2)
-        rooms_count = serializers.CharField()
+        rooms_count = serializers.IntegerField()
         wc_count = serializers.IntegerField()
         floor = serializers.IntegerField()
         status = serializers.CharField()
