@@ -18,6 +18,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'drf_spectacular',
     'realty.apps.RealtyConfig',
 ]
 
@@ -86,5 +87,13 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
 
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'API сайта по продаже недвижимости',
+    'DESCRIPTION': """Сайт по продаже квартир типа как у самолета с возможностью
+    выбирать квартиры, этажи, дома, проекты. Найдите квартиру своей мечты и 
+    поплачьте о том, что стоит она ебанистических денег.""",
+    'VERSION': '0.0.1',
 }
