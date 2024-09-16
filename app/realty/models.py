@@ -25,7 +25,7 @@ class Flat(BaseModel):
         CUATRO = 4, "4"
 
     area = models.DecimalField(
-        max_digits=5, decimal_places=2, blank=False, verbose_name="Площадь"
+        max_digits=5, decimal_places=2, blank=False, verbose_name="Площадь",
     )
     rooms_count = models.IntegerField(
         blank=False, choices=NumOfRoomsChoices, verbose_name="Число комнат"
