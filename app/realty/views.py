@@ -1,19 +1,14 @@
-from rest_framework.generics import CreateAPIView, RetrieveAPIView, UpdateAPIView, DestroyAPIView
+from rest_framework.generics import RetrieveAPIView
 from rest_framework.views import APIView
 from rest_framework import serializers, status
 from rest_framework.response import Response
 from realty.models import Flat
 from django.http import Http404
-from drf_spectacular.utils import extend_schema, extend_schema_view
-
-# Flat APIs
-
-class FlatCreateAPIView(CreateAPIView):
-    pass
+from drf_spectacular.utils import extend_schema
 
 
 class FlatListAPIView(APIView):
-    class OutputSerializer(serializers.Serializer):
+    class FlatListSerializer(serializers.Serializer):
         id = serializers.IntegerField()
         area = serializers.DecimalField(max_digits=5, decimal_places=2)
         rooms_count = serializers.IntegerField()
@@ -27,15 +22,18 @@ class FlatListAPIView(APIView):
             summary="Получение полного списка всех квартир.",
             description="""Очень удобное api для получение полного списка 
             квартир которые когда-либол были добавлены на сайт.""",
+            responses={
+                status.HTTP_200_OK: FlatListSerializer,
+            }
     )
     def get(self, request):
         flats = Flat.objects.all()
-        serializer = FlatListAPIView.OutputSerializer(flats, many=True)
+        serializer = FlatListAPIView.FlatListSerializer(flats, many=True)
         return Response(serializer.data)
 
 
-class FlatDetailAPIView(RetrieveAPIView):
-    class OutputSerializer(serializers.Serializer):
+class FlatDetailAPIView(APIView):
+    class FlatDetailSerializer(serializers.Serializer):
         id = serializers.IntegerField()
         area = serializers.DecimalField(max_digits=5, decimal_places=2)
         rooms_count = serializers.IntegerField()
@@ -53,18 +51,13 @@ class FlatDetailAPIView(RetrieveAPIView):
 
     @extend_schema(
             summary="Получение конкретной квартиры по её идентификатору flat_id.",
-            description="""Очень удобное api для получения конекртной квартиры 
+            description="""Очень удобное api для получения конекртной квартиры
             по её уникальному иднетификатору flat_id.""",
+            responses={
+                status.HTTP_200_OK: FlatDetailSerializer,
+            }
     )
     def get(self, request, flat_id):
         flat = self.get_object(flat_id)
-        serializer = FlatDetailAPIView.OutputSerializer(flat)
+        serializer = FlatDetailAPIView.FlatDetailSerializer(flat)
         return Response(serializer.data)
-
-
-class FlatUpdateAPIView(UpdateAPIView):
-    pass
-
-
-class FlatDestroyAPIView(DestroyAPIView):
-    pass
