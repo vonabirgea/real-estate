@@ -1,4 +1,3 @@
-from rest_framework.generics import RetrieveAPIView
 from rest_framework.views import APIView
 from rest_framework import serializers, status
 from rest_framework.response import Response
@@ -19,12 +18,12 @@ class FlatListAPIView(APIView):
         last_update = serializers.DateTimeField()
 
     @extend_schema(
-            summary="Получение полного списка всех квартир.",
-            description="""Очень удобное api для получение полного списка 
+        summary="Получение полного списка всех квартир.",
+        description="""Очень удобное api для получение полного списка 
             квартир которые когда-либол были добавлены на сайт.""",
-            responses={
-                status.HTTP_200_OK: FlatListSerializer,
-            }
+        responses={
+            status.HTTP_200_OK: FlatListSerializer,
+        },
     )
     def get(self, request):
         flats = Flat.objects.all()
@@ -50,12 +49,12 @@ class FlatDetailAPIView(APIView):
             raise Http404
 
     @extend_schema(
-            summary="Получение конкретной квартиры по её идентификатору flat_id.",
-            description="""Очень удобное api для получения конекртной квартиры
+        summary="Получение конкретной квартиры по её идентификатору flat_id.",
+        description="""Очень удобное api для получения конкретной квартиры
             по её уникальному иднетификатору flat_id.""",
-            responses={
-                status.HTTP_200_OK: FlatDetailSerializer,
-            }
+        responses={
+            status.HTTP_200_OK: FlatDetailSerializer,
+        },
     )
     def get(self, request, flat_id):
         flat = self.get_object(flat_id)
