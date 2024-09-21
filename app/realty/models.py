@@ -28,6 +28,7 @@ class Flat(BaseModel):
         TRES = 3, "3"
         CUATRO = 4, "4"
 
+    number = models.IntegerField(blank=False, verbose_name="Номер квартиры")
     area = models.DecimalField(
         max_digits=5,
         decimal_places=2,
@@ -38,7 +39,9 @@ class Flat(BaseModel):
         blank=False, choices=NumOfRoomsChoices, verbose_name="Число комнат"
     )
     wc_count = models.IntegerField(blank=False, verbose_name="Число санузлов")
-    floor = models.ForeignKey(to="Flat", on_delete=models.CASCADE, null=True)
+    floor = models.ForeignKey(
+        to="Floor", on_delete=models.CASCADE, null=True, verbose_name="Этаж"
+    )
     status = models.CharField(
         max_length=3,
         choices=StatusChoices,
@@ -48,7 +51,7 @@ class Flat(BaseModel):
     description = models.TextField(blank=True, verbose_name="Описание квартиры")
 
     def __str__(self):
-        return f"Квартира №{self.pk} площадью {self.area} на КАКОМ-ТО этаже."
+        return f"Квартира №{self.pk} площадью {self.area} на {self.floor.floor} этаже."
 
     class Meta:
         verbose_name = "Квартира"

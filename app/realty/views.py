@@ -1,19 +1,23 @@
 from rest_framework.views import APIView
 from rest_framework import serializers, status
 from rest_framework.response import Response
-from realty.models import Flat
+from realty.servises import get_all_objects, get_object_by_pk
+from realty.models import Flat, Floor
 from django.http import Http404
 from drf_spectacular.utils import extend_schema
+from drf_spectacular.types import OpenApiTypes
 
 
 class FlatListAPIView(APIView):
     class FlatListSerializer(serializers.Serializer):
         id = serializers.IntegerField()
+        number = serializers.IntegerField()
         area = serializers.DecimalField(max_digits=5, decimal_places=2)
         rooms_count = serializers.IntegerField()
         wc_count = serializers.IntegerField()
-        floor = serializers.IntegerField()
+        floor = serializers.IntegerField(source="floor.floor")
         status = serializers.CharField()
+        description = serializers.CharField()
         created_at = serializers.DateTimeField()
         last_update = serializers.DateTimeField()
 
@@ -21,32 +25,33 @@ class FlatListAPIView(APIView):
         summary="Получение полного списка всех квартир.",
         description="""Очень удобное api для получение полного списка 
             квартир которые когда-либол были добавлены на сайт.""",
-        responses={
-            status.HTTP_200_OK: FlatListSerializer,
-        },
+        responses={},
+        tags=["Квартиры"],
     )
     def get(self, request):
-        flats = Flat.objects.all()
+        flats = get_all_objects(model=Flat)
+        total_flats = get_all_objects(Flat).count()
         serializer = FlatListAPIView.FlatListSerializer(flats, many=True)
-        return Response(serializer.data)
+        return Response(
+            {
+                "total_flats": total_flats,
+                "flats": serializer.data,
+            }
+        )
 
 
 class FlatDetailAPIView(APIView):
     class FlatDetailSerializer(serializers.Serializer):
         id = serializers.IntegerField()
+        number = serializers.IntegerField()
         area = serializers.DecimalField(max_digits=5, decimal_places=2)
         rooms_count = serializers.IntegerField()
         wc_count = serializers.IntegerField()
-        floor = serializers.IntegerField()
+        floor = serializers.IntegerField(source="floor.floor")
         status = serializers.CharField()
+        description = serializers.CharField()
         created_at = serializers.DateTimeField()
         last_update = serializers.DateTimeField()
-
-    def get_object(self, flat_id):
-        try:
-            return Flat.objects.get(pk=flat_id)
-        except Flat.DoesNotExist:
-            raise Http404
 
     @extend_schema(
         summary="Получение конкретной квартиры по её идентификатору flat_id.",
@@ -55,8 +60,53 @@ class FlatDetailAPIView(APIView):
         responses={
             status.HTTP_200_OK: FlatDetailSerializer,
         },
+        tags=["Квартиры"],
     )
     def get(self, request, flat_id):
-        flat = self.get_object(flat_id)
+        flat = get_object_by_pk(Flat, flat_id)
         serializer = FlatDetailAPIView.FlatDetailSerializer(flat)
+        return Response(serializer.data)
+
+
+class FloorListAPIView(APIView):
+    class FloorListSerializer(serializers.Serializer):
+        id = serializers.IntegerField()
+        floor = serializers.IntegerField()
+        flats_count = serializers.IntegerField()
+        status = serializers.CharField()
+        description = serializers.CharField()
+
+    @extend_schema(
+        summary="Получение полного списка этажей.",
+        description="API для получение полного списка этажей",
+        responses={
+            status.HTTP_200_OK: FloorListSerializer,
+        },
+        tags=["Этажи"],
+    )
+    def get(self, request):
+        floors = get_all_objects(model=Floor)
+        serializer = FloorListAPIView.FloorListSerializer(floors, many=True)
+        return Response(serializer.data)
+
+
+class FloorDetailAPIView(APIView):
+    class FloorDetailSerializer(serializers.Serializer):
+        id = serializers.IntegerField()
+        floor = serializers.IntegerField()
+        flats_count = serializers.IntegerField()
+        status = serializers.CharField()
+        description = serializers.CharField()
+
+    @extend_schema(
+        summary="Получение этажа по идентификатору floor_id.",
+        description="API для получения конкретного этажа по floor_id",
+        responses={
+            status.HTTP_200_OK: FloorDetailSerializer,
+        },
+        tags=["Этажи"],
+    )
+    def get(self, request, floor_id):
+        floor = get_object_by_pk(Floor, floor_id)
+        serializer = FloorDetailAPIView.FloorDetailSerializer(floor)
         return Response(serializer.data)
