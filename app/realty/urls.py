@@ -10,7 +10,7 @@ from .views import (
 
 urlpatterns = [
     path("flats", FlatListAPIView.as_view()),
-    path("flat/<int:flat_id>/", FlatDetailAPIView.as_view()),
+    path("flats/<int:flat_id>/", FlatDetailAPIView.as_view()),
     path("floors/", FloorListAPIView.as_view()),
-    path("floor/<int:floor_id>/", FloorDetailAPIView.as_view()),
+    path("floors/<int:floor_id>/", FloorDetailAPIView.as_view()),
 ]

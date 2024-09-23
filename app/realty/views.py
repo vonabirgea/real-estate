@@ -1,11 +1,9 @@
 from rest_framework.views import APIView
 from rest_framework import serializers, status
 from rest_framework.response import Response
-from realty.servises import get_all_objects, get_object_by_pk
+from realty.selectors import count_entities, get_all_objects, get_object_by_pk
 from realty.models import Flat, Floor
-from django.http import Http404
 from drf_spectacular.utils import extend_schema
-from drf_spectacular.types import OpenApiTypes
 
 
 class FlatListAPIView(APIView):
@@ -23,21 +21,15 @@ class FlatListAPIView(APIView):
 
     @extend_schema(
         summary="Получение полного списка всех квартир.",
-        description="""Очень удобное api для получение полного списка 
-            квартир которые когда-либол были добавлены на сайт.""",
+        description="API для получение полного списка квартир на сайте.",
         responses={},
         tags=["Квартиры"],
     )
     def get(self, request):
-        flats = get_all_objects(model=Flat)
-        total_flats = get_all_objects(Flat).count()
+        flats = get_all_objects(model=Flat).select_related("floor")
+        total_flats = count_entities(queryset=flats)
         serializer = FlatListAPIView.FlatListSerializer(flats, many=True)
-        return Response(
-            {
-                "total_flats": total_flats,
-                "flats": serializer.data,
-            }
-        )
+        return Response({"total_flats": total_flats, "flats": serializer.data})
 
 
 class FlatDetailAPIView(APIView):
@@ -72,7 +64,7 @@ class FloorListAPIView(APIView):
     class FloorListSerializer(serializers.Serializer):
         id = serializers.IntegerField()
         floor = serializers.IntegerField()
-        flats_count = serializers.IntegerField()
+        flats_on_floor = serializers.IntegerField()
         status = serializers.CharField()
         description = serializers.CharField()
 
@@ -94,7 +86,7 @@ class FloorDetailAPIView(APIView):
     class FloorDetailSerializer(serializers.Serializer):
         id = serializers.IntegerField()
         floor = serializers.IntegerField()
-        flats_count = serializers.IntegerField()
+        flats_on_floor = serializers.IntegerField()
         status = serializers.CharField()
         description = serializers.CharField()
 

@@ -51,7 +51,7 @@ class Flat(BaseModel):
     description = models.TextField(blank=True, verbose_name="Описание квартиры")
 
     def __str__(self):
-        return f"Квартира №{self.pk} площадью {self.area} на {self.floor.floor} этаже."
+        return f"Квартира №{self.number} площадью {self.area}."
 
     class Meta:
         verbose_name = "Квартира"
@@ -65,7 +65,7 @@ class Floor(BaseModel):
         SOLD = "SLD", "Полностью выкуплен"
 
     floor = models.IntegerField(verbose_name="Этаж")
-    flats_count = models.IntegerField(
+    flats_on_floor = models.IntegerField(
         verbose_name="Количество квартир на этаже"
     )
     status = models.CharField(
@@ -77,7 +77,7 @@ class Floor(BaseModel):
     description = models.TextField(blank=True, verbose_name="Описание этажа")
 
     def __str__(self):
-        return f"Этаж {self.floor} с {self.flats_count} квартирами."
+        return f"Этаж {self.floor} с {self.flats_on_floor} квартирами."
 
     class Meta:
         verbose_name = "Этаж"
