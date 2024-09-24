@@ -7,6 +7,11 @@ admin.AdminSite.index_title = "Сайт недвижимости"
 
 
 class FlatAdmin(admin.ModelAdmin):
+    def get_floor_by_flat(self, flat):
+        return flat.floor.floor
+
+    get_floor_by_flat.short_description = "Этаж"
+
     fields = [
         "number",
         "area",
@@ -16,12 +21,7 @@ class FlatAdmin(admin.ModelAdmin):
         "created_at",
     ]
 
-    readonly_fields = ["created_at"]
-
-    def get_floor_by_flat(self, flat):
-        return flat.floor.floor
-
-    get_floor_by_flat.short_description = "Этаж"
+    readonly_fields = ["floor", "created_at"]
 
     list_display = [
         "number",
