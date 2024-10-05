@@ -1,8 +1,16 @@
 from rest_framework.views import APIView
 from rest_framework import serializers, status
 from rest_framework.response import Response
-from realty.selectors import count_entities, get_all_objects, get_object_by_pk
-from realty.models import Flat, Floor
+from realty.selectors import (
+    count_entities,
+    count_flats_in_building,
+    count_flats_in_project,
+    get_all_objects,
+    get_buildings_by_project,
+    get_flats_by_building,
+    get_object_by_pk,
+)
+from realty.models import Flat, Floor, Entrance, Building, Project
 from drf_spectacular.utils import extend_schema, inline_serializer
 
 
@@ -77,6 +85,7 @@ class FloorListAPIView(APIView):
         flats_on_floor = serializers.IntegerField()
         status = serializers.CharField()
         description = serializers.CharField()
+        entrance = serializers.IntegerField(source="entrance.id")
 
     @extend_schema(
         summary="Получение полного списка этажей.",
@@ -121,3 +130,181 @@ class FloorDetailAPIView(APIView):
         floor = get_object_by_pk(Floor, floor_id)
         serializer = FloorDetailAPIView.FloorDetailSerializer(floor)
         return Response(serializer.data)
+
+
+class EntranceListAPIView(APIView):
+    class EntranceListSerializer(serializers.Serializer):
+        id = serializers.IntegerField()
+        number = serializers.IntegerField()
+        total_flats = serializers.IntegerField()
+        total_floors = serializers.IntegerField()
+        building = serializers.IntegerField(source="building.id")
+
+    @extend_schema(
+        summary="Получение полного списка подъездов",
+        description="API для получения списка подъездов",
+        responses={
+            status.HTTP_200_OK: inline_serializer(
+                name="EntranceListResponse",
+                fields={
+                    "total_entrances": serializers.IntegerField(),
+                    "entrances": EntranceListSerializer(many=True),
+                },
+            )
+        },
+        tags=["Подъезды"],
+    )
+    def get(self, request):
+        entrances = get_all_objects(model=Entrance).select_related("building")
+        total_entrances = count_entities(queryset=entrances)
+        serializer = EntranceListAPIView.EntranceListSerializer(
+            entrances, many=True
+        )
+        return Response(
+            {"total_entrances": total_entrances, "entrances": serializer.data}
+        )
+
+
+class BuildingListAPIView(APIView):
+    class BuildingListSerializer(serializers.Serializer):
+        id = serializers.IntegerField()
+        number = serializers.IntegerField()
+        entrances = serializers.IntegerField()
+        project = serializers.IntegerField(source="project.id")
+        commissioning_date = serializers.DateField()
+
+    @extend_schema(
+        summary="Получение полного списка зданий",
+        description="API для получения списка зданий",
+        responses={
+            status.HTTP_200_OK: inline_serializer(
+                name="BuildingListResponse",
+                fields={
+                    "total_buildings": serializers.IntegerField(),
+                    "buidings": BuildingListSerializer(many=True),
+                },
+            )
+        },
+        tags=["Здания (корпуса)"],
+    )
+    def get(self, request):
+        buildings = get_all_objects(model=Building).select_related("project")
+        total_buildings = count_entities(queryset=buildings)
+        serializer = BuildingListAPIView.BuildingListSerializer(
+            buildings, many=True
+        )
+        return Response(
+            {"total_buildings": total_buildings, "buildings": serializer.data}
+        )
+
+
+class BuildingDetailAPIView(APIView):
+    class BuildingDetailSerializer(serializers.Serializer):
+        id = serializers.IntegerField()
+        number = serializers.IntegerField()
+        entrances = serializers.IntegerField()
+        max_floors = serializers.IntegerField()
+        project = serializers.IntegerField(source="project.id")
+        commissioning_date = serializers.DateField()
+
+    @extend_schema(
+        summary="Получение здания по его building_id",
+        description="API для получения конкретного здания",
+        responses={
+            status.HTTP_200_OK: inline_serializer(
+                name="BuildingDetailResponse",
+                fields={
+                    "building_info": BuildingDetailSerializer(),
+                    "total_flats": serializers.IntegerField(),
+                    "flats": FlatListAPIView.FlatListSerializer(many=True),
+                },
+            )
+        },
+        tags=["Здания (корпуса)"],
+    )
+    def get(self, request, building_id):
+        building = get_object_by_pk(Building, building_id)
+        flats = get_flats_by_building(building_id)
+        total_flats = count_flats_in_building(building_id)
+        serializer = BuildingDetailAPIView.BuildingDetailSerializer(building)
+        flats_serializer = FlatListAPIView.FlatListSerializer(flats, many=True)
+        return Response(
+            {
+                "building_info": serializer.data,
+                "total_flats": total_flats,
+                "flats": flats_serializer.data,
+            }
+        )
+
+
+class ProjectListAPIView(APIView):
+    class ProjectListSerializer(serializers.Serializer):
+        id = serializers.IntegerField()
+        name = serializers.CharField()
+        total_buildings = serializers.IntegerField()
+        description = serializers.CharField()
+
+    @extend_schema(
+        summary="Получение списка проектов",
+        description="API для получения списка проектов",
+        responses={
+            status.HTTP_200_OK: inline_serializer(
+                name="ProjectListresponse",
+                fields={
+                    "total_projects": serializers.IntegerField(),
+                    "projects": ProjectListSerializer(many=True),
+                },
+            )
+        },
+        tags=["Проекты"],
+    )
+    def get(self, request):
+        projects = get_all_objects(model=Project)
+        total_projects = count_entities(projects)
+        serializer = ProjectListAPIView.ProjectListSerializer(
+            projects, many=True
+        )
+        return Response(
+            {"total_projects": total_projects, "projects": serializer.data}
+        )
+
+
+class ProjectDetailAPIView(APIView):
+    class ProjectDetailSerializer(serializers.Serializer):
+        id = serializers.IntegerField()
+        name = serializers.CharField()
+        total_buildings = serializers.IntegerField()
+        description = serializers.CharField()
+
+    @extend_schema(
+        summary="Получение информации о проекте",
+        description="API для получения информации о проекте по project_id",
+        responses={
+            status.HTTP_200_OK: inline_serializer(
+                name="ProjectDetailResponse",
+                fields={
+                    "project_info": ProjectDetailSerializer(),
+                    "total_flats": serializers.IntegerField(),
+                    "project_buildings": BuildingListAPIView.BuildingListSerializer(
+                        many=True
+                    ),
+                },
+            )
+        },
+        tags=["Проекты"],
+    )
+    def get(self, response, project_id):
+        project = get_object_by_pk(model=Project, pk=project_id)
+        buildings = get_buildings_by_project(project_id)
+        serializer = ProjectDetailAPIView.ProjectDetailSerializer(project)
+        buildings_serializer = BuildingListAPIView.BuildingListSerializer(
+            buildings, many=True
+        )
+        total_flats_in_project = count_flats_in_project(project_id)
+        return Response(
+            {
+                "project_info": serializer.data,
+                "total_flats": total_flats_in_project,
+                "project_buildings": buildings_serializer.data,
+            }
+        )
