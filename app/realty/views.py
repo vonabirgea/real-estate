@@ -22,7 +22,7 @@ class FlatListAPIView(APIView):
         area = serializers.FloatField()
         rooms_count = serializers.IntegerField()
         wc_count = serializers.IntegerField()
-        floor = serializers.IntegerField(source="floor.floor")
+        floor_id = serializers.IntegerField(source="floor.id")
         status = serializers.CharField()
         description = serializers.CharField()
         created_at = serializers.DateTimeField()
@@ -53,11 +53,10 @@ class FlatDetailAPIView(APIView):
     class FlatDetailSerializer(serializers.Serializer):
         id = serializers.IntegerField()
         number = serializers.IntegerField()
-        # area = serializers.DecimalField(max_digits=5, decimal_places=2)
         area = serializers.FloatField()
         rooms_count = serializers.IntegerField()
         wc_count = serializers.IntegerField()
-        floor = serializers.IntegerField(source="floor.floor")
+        floor_id = serializers.IntegerField(source="floor.id")
         status = serializers.CharField()
         description = serializers.CharField()
         created_at = serializers.DateTimeField()
@@ -82,10 +81,10 @@ class FloorListAPIView(APIView):
     class FloorListSerializer(serializers.Serializer):
         id = serializers.IntegerField()
         floor = serializers.IntegerField()
-        flats_on_floor = serializers.IntegerField()
+        flats_count = serializers.IntegerField()
         status = serializers.CharField()
         description = serializers.CharField()
-        entrance = serializers.IntegerField(source="entrance.id")
+        entrance_id = serializers.IntegerField(source="entrance.id")
 
     @extend_schema(
         summary="Получение полного списка этажей.",
@@ -114,9 +113,10 @@ class FloorDetailAPIView(APIView):
     class FloorDetailSerializer(serializers.Serializer):
         id = serializers.IntegerField()
         floor = serializers.IntegerField()
-        flats_on_floor = serializers.IntegerField()
+        flats_count = serializers.IntegerField()
         status = serializers.CharField()
         description = serializers.CharField()
+        entrance_id = serializers.IntegerField(source="entrance.id")
 
     @extend_schema(
         summary="Получение этажа по идентификатору floor_id.",
@@ -136,9 +136,9 @@ class EntranceListAPIView(APIView):
     class EntranceListSerializer(serializers.Serializer):
         id = serializers.IntegerField()
         number = serializers.IntegerField()
-        total_flats = serializers.IntegerField()
-        total_floors = serializers.IntegerField()
-        building = serializers.IntegerField(source="building.id")
+        flats_count = serializers.IntegerField()
+        floors_count = serializers.IntegerField()
+        building_id = serializers.IntegerField(source="building.id")
 
     @extend_schema(
         summary="Получение полного списка подъездов",
@@ -169,8 +169,9 @@ class BuildingListAPIView(APIView):
     class BuildingListSerializer(serializers.Serializer):
         id = serializers.IntegerField()
         number = serializers.IntegerField()
-        entrances = serializers.IntegerField()
-        project = serializers.IntegerField(source="project.id")
+        entrances_count = serializers.IntegerField()
+        max_floors = serializers.IntegerField()
+        project_id = serializers.IntegerField(source="project.id")
         commissioning_date = serializers.DateField()
 
     @extend_schema(
@@ -202,9 +203,9 @@ class BuildingDetailAPIView(APIView):
     class BuildingDetailSerializer(serializers.Serializer):
         id = serializers.IntegerField()
         number = serializers.IntegerField()
-        entrances = serializers.IntegerField()
+        entrances_count = serializers.IntegerField()
         max_floors = serializers.IntegerField()
-        project = serializers.IntegerField(source="project.id")
+        project_id = serializers.IntegerField(source="project.id")
         commissioning_date = serializers.DateField()
 
     @extend_schema(
@@ -241,7 +242,7 @@ class ProjectListAPIView(APIView):
     class ProjectListSerializer(serializers.Serializer):
         id = serializers.IntegerField()
         name = serializers.CharField()
-        total_buildings = serializers.IntegerField()
+        buildings_count = serializers.IntegerField()
         description = serializers.CharField()
 
     @extend_schema(
@@ -273,7 +274,7 @@ class ProjectDetailAPIView(APIView):
     class ProjectDetailSerializer(serializers.Serializer):
         id = serializers.IntegerField()
         name = serializers.CharField()
-        total_buildings = serializers.IntegerField()
+        buildings_count = serializers.IntegerField()
         description = serializers.CharField()
 
     @extend_schema(

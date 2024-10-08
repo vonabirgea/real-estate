@@ -29,7 +29,7 @@ def count_flats_in_building(building_id):
     )
     total_flats_in_building = 0
     for entrance in entrances:
-        total_flats_in_building += entrance.total_flats
+        total_flats_in_building += entrance.flats_count
     return total_flats_in_building
 
 
@@ -46,5 +46,5 @@ def count_flats_in_project(project_id):
     )
     total_flats = 0
     for entrance in entrances:
-        total_flats += entrance.total_flats
+        total_flats += entrance.flats_count
     return total_flats

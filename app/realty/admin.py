@@ -42,11 +42,11 @@ class FloorAdmin(admin.ModelAdmin):
 
     get_entrance_by_floor.short_description = "Номер подъезда"
 
-    fields = ["floor", "flats_on_floor", "status", "description", "created_at"]
+    fields = ["floor", "flats_count", "status", "description", "created_at"]
     readonly_fields = ["created_at"]
     list_display = [
         "floor",
-        "flats_on_floor",
+        "flats_count",
         "status",
         "get_entrance_by_floor",
     ]
@@ -64,12 +64,12 @@ class EntranceAdmin(admin.ModelAdmin):
 
     get_project_by_entrance.short_description = "Проект"
 
-    fields = ["number", "total_flats", "total_floors"]
+    fields = ["number", "flats_count", "floors_count"]
     readonly_fields = ["created_at"]
     list_display = [
         "number",
-        "total_flats",
-        "total_floors",
+        "flats_count",
+        "floors_count",
         "get_building_by_entrance",
         "get_project_by_entrance",
     ]
@@ -82,22 +82,22 @@ class BuildingAdmin(admin.ModelAdmin):
 
     get_project_by_building.short_description = "Проект"
 
-    fields = ["number", "entrances", "project"]
+    fields = ["number", "entrances_count", "project"]
     readonly_fields = ["created_at", "project"]
-    list_display = ["number", "entrances", "get_project_by_building"]
+    list_display = ["number", "entrances_count", "get_project_by_building"]
     list_select_related = ["project"]
 
 
 class ProjectAdmin(admin.ModelAdmin):
     fields = [
         "name",
-        "total_buildings",
+        "buildings_count",
         "description",
         "created_at",
         "last_update",
     ]
-    readonly_fields = ["created_at", "last_update", "total_buildings"]
-    list_display = ["name", "total_buildings", "description"]
+    readonly_fields = ["created_at", "last_update", "buildings_count"]
+    list_display = ["name", "buildings_count", "description"]
 
 
 admin.site.register(Flat, FlatAdmin)

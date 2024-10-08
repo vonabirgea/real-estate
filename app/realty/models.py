@@ -65,8 +65,8 @@ class Floor(BaseModel):
         SOLD = "SLD", "Полностью выкуплен"
 
     floor = models.IntegerField(verbose_name="Этаж")
-    flats_on_floor = models.IntegerField(
-        verbose_name="Количество квартир на этаже"
+    flats_count = models.IntegerField(
+        verbose_name="Число квартир на этаже", null=True
     )
     status = models.CharField(
         max_length=3,
@@ -83,7 +83,7 @@ class Floor(BaseModel):
     )
 
     def __str__(self):
-        return f"Этаж {self.floor} с {self.flats_on_floor} квартирами."
+        return f"Этаж {self.floor} с {self.flats_count} квартирами."
 
     class Meta:
         verbose_name = "Этаж"
@@ -92,8 +92,8 @@ class Floor(BaseModel):
 
 class Entrance(BaseModel):
     number = models.IntegerField(verbose_name="Номер подъезда")
-    total_flats = models.IntegerField(verbose_name="Общее число квартир")
-    total_floors = models.IntegerField(verbose_name="Общее число этажей")
+    flats_count = models.IntegerField(verbose_name="Общее число квартир")
+    floors_count = models.IntegerField(verbose_name="Общее число этажей")
     building = models.ForeignKey(
         to="Building", verbose_name="Дом", on_delete=models.CASCADE, null=True
     )
@@ -108,7 +108,7 @@ class Entrance(BaseModel):
 
 class Building(BaseModel):
     number = models.IntegerField(verbose_name="Номер дома (корпуса)")
-    entrances = models.IntegerField(verbose_name="Число подъездов в доме")
+    entrances_count = models.IntegerField(verbose_name="Число подъездов в доме")
     project = models.ForeignKey(
         "Project", verbose_name="Проект", on_delete=models.CASCADE
     )
@@ -128,7 +128,7 @@ class Building(BaseModel):
 
 class Project(BaseModel):
     name = models.CharField(verbose_name="Название проекта", max_length=50)
-    total_buildings = models.IntegerField(verbose_name="Число домов в проекте")
+    buildings_count = models.IntegerField(verbose_name="Число домов в проекте")
     description = models.TextField(max_length=150, verbose_name="Описание")
     city = models.CharField(max_length=20, verbose_name="Город", null=True)
 
