@@ -1,6 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework import serializers, status
 from rest_framework.response import Response
+from realty.servises import get_flats_by_entrance
 from realty.selectors import (
     count_entities,
     count_flats_in_building,
@@ -162,6 +163,44 @@ class EntranceListAPIView(APIView):
         )
         return Response(
             {"total_entrances": total_entrances, "entrances": serializer.data}
+        )
+
+
+class EntranceDetailAPIView(APIView):
+    class EntranceDetailSerialiser(serializers.Serializer):
+        id = serializers.IntegerField()
+        number = serializers.IntegerField()
+        flats_count = serializers.IntegerField()
+        floors_count = serializers.IntegerField()
+        building_id = serializers.IntegerField(source="building.id")
+
+    @extend_schema(
+        summary="Получение подъезда по его entrance_id",
+        description="API для получения конкретного подъезда",
+        responses={
+            status.HTTP_200_OK: inline_serializer(
+                name="EntranceDetailResponse",
+                fields={
+                    "entrance_info": EntranceDetailSerialiser(),
+                    "total_flats": serializers.IntegerField(),
+                    "flats": FlatListAPIView.FlatListSerializer(many=True),
+                },
+            )
+        },
+        tags=["Подъезды"],
+    )
+    def get(self, request, entrance_id):
+        entrance = get_object_by_pk(Entrance, entrance_id)
+        flats = get_flats_by_entrance(entrance_id)
+        total_flats = len(flats)
+        serializer = EntranceDetailAPIView.EntranceDetailSerialiser(entrance)
+        flats_serializer = FlatListAPIView.FlatListSerializer(flats, many=True)
+        return Response(
+            {
+                "entrance_info": serializer.data,
+                "total_flats": total_flats,
+                "flats": flats_serializer.data,
+            }
         )
 
 
