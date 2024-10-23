@@ -65,8 +65,8 @@ class Floor(BaseModel):
         SOLD = "SLD", "Полностью выкуплен"
 
     floor = models.IntegerField(verbose_name="Этаж")
-    flats_on_floor = models.IntegerField(
-        verbose_name="Количество квартир на этаже"
+    flats_count = models.IntegerField(
+        verbose_name="Число квартир на этаже", null=True
     )
     status = models.CharField(
         max_length=3,
@@ -75,10 +75,66 @@ class Floor(BaseModel):
         verbose_name="Статус",
     )
     description = models.TextField(blank=True, verbose_name="Описание этажа")
+    entrance = models.ForeignKey(
+        to="Entrance",
+        verbose_name="Подъезд",
+        on_delete=models.CASCADE,
+        null=True,
+    )
 
     def __str__(self):
-        return f"Этаж {self.floor} с {self.flats_on_floor} квартирами."
+        return f"Этаж {self.floor} с {self.flats_count} квартирами."
 
     class Meta:
         verbose_name = "Этаж"
         verbose_name_plural = "Этажи"
+
+
+class Entrance(BaseModel):
+    number = models.IntegerField(verbose_name="Номер подъезда")
+    flats_count = models.IntegerField(verbose_name="Общее число квартир")
+    floors_count = models.IntegerField(verbose_name="Общее число этажей")
+    building = models.ForeignKey(
+        to="Building", verbose_name="Дом", on_delete=models.CASCADE, null=True
+    )
+
+    def __str__(self) -> str:
+        return f"Подъезд №{self.number}."
+
+    class Meta:
+        verbose_name = "Подъезд"
+        verbose_name_plural = "Подъезды"
+
+
+class Building(BaseModel):
+    number = models.IntegerField(verbose_name="Номер дома (корпуса)")
+    entrances_count = models.IntegerField(verbose_name="Число подъездов в доме")
+    project = models.ForeignKey(
+        "Project", verbose_name="Проект", on_delete=models.CASCADE
+    )
+    max_floors = models.IntegerField(verbose_name="Этажность", null=True)
+    commissioning_date = models.DateField(
+        null=True, verbose_name="Дата сдачи дома"
+    )
+    address = models.CharField(max_length=50, verbose_name="Адрес", null=True)
+
+    def __str__(self) -> str:
+        return f"Дом номер {self.number}"
+
+    class Meta:
+        verbose_name = "Дом"
+        verbose_name_plural = "Дома"
+
+
+class Project(BaseModel):
+    name = models.CharField(verbose_name="Название проекта", max_length=50)
+    buildings_count = models.IntegerField(verbose_name="Число домов в проекте")
+    description = models.TextField(max_length=150, verbose_name="Описание")
+    city = models.CharField(max_length=20, verbose_name="Город", null=True)
+
+    def __str__(self) -> str:
+        return f"Проект {self.name}"
+
+    class Meta:
+        verbose_name = "Проект"
+        verbose_name_plural = "Проекты"
