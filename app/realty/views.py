@@ -1,8 +1,15 @@
 from rest_framework.views import APIView
 from rest_framework import serializers, status
 from rest_framework.response import Response
-from realty.servises import get_flats_by_entrance
-from realty.selectors import (
+from drf_spectacular.utils import extend_schema, inline_serializer
+from .servises import (
+    get_floor,
+    list_flats,
+    get_flat,
+    list_flats_on_floor,
+    list_floors,
+)
+from .selectors import (
     count_entities,
     count_flats_in_building,
     count_flats_in_project,
@@ -11,8 +18,7 @@ from realty.selectors import (
     get_flats_by_building,
     get_object_by_pk,
 )
-from realty.models import Flat, Floor, Entrance, Building, Project
-from drf_spectacular.utils import extend_schema, inline_serializer
+from .models import Flat, Floor, Entrance, Building, Project
 
 
 class FlatListAPIView(APIView):
@@ -44,8 +50,7 @@ class FlatListAPIView(APIView):
         tags=["Квартиры"],
     )
     def get(self, request):
-        flats = get_all_objects(model=Flat).select_related("floor")
-        total_flats = count_entities(queryset=flats)
+        total_flats, flats = list_flats()
         serializer = FlatListAPIView.FlatListSerializer(flats, many=True)
         return Response({"total_flats": total_flats, "flats": serializer.data})
 
@@ -73,7 +78,7 @@ class FlatDetailAPIView(APIView):
         tags=["Квартиры"],
     )
     def get(self, request, flat_id):
-        flat = get_object_by_pk(Flat, flat_id)
+        flat = get_flat(flat_id)
         serializer = FlatDetailAPIView.FlatDetailSerializer(flat)
         return Response(serializer.data)
 
@@ -102,8 +107,7 @@ class FloorListAPIView(APIView):
         tags=["Этажи"],
     )
     def get(self, request):
-        floors = get_all_objects(model=Floor)
-        total_floors = count_entities(floors)
+        total_floors, floors = list_floors()
         serializer = FloorListAPIView.FloorListSerializer(floors, many=True)
         return Response(
             {"total_floors": total_floors, "floors": serializer.data}
@@ -128,9 +132,40 @@ class FloorDetailAPIView(APIView):
         tags=["Этажи"],
     )
     def get(self, request, floor_id):
-        floor = get_object_by_pk(Floor, floor_id)
-        serializer = FloorDetailAPIView.FloorDetailSerializer(floor)
-        return Response(serializer.data)
+        floor, flats = get_floor(floor_id)
+        floor_serializer = FloorDetailAPIView.FloorDetailSerializer(floor)
+        return Response(
+            {
+                "floor_info": floor_serializer.data,
+                "flats_on_floor": flats,
+            }
+        )
+
+
+class FlatsOnFloorListAPIView(APIView):
+    class FlatListSerializer(serializers.Serializer):
+        id = serializers.IntegerField()
+        number = serializers.IntegerField()
+        area = serializers.FloatField()
+        rooms_count = serializers.IntegerField()
+        wc_count = serializers.IntegerField()
+        floor_id = serializers.IntegerField(source="floor.id")
+        status = serializers.CharField()
+        description = serializers.CharField()
+        created_at = serializers.DateTimeField()
+        last_update = serializers.DateTimeField()
+
+    @extend_schema(
+        summary="Получение квартир для определенного этажа",
+        description="API для получения списка квартир по этажу через floor_id",
+        tags=["Этажи", "Квартиры"],
+    )
+    def get(self, request, floor_id):
+        total_flats, flats = list_flats_on_floor(floor_id)
+        serializer = FlatsOnFloorListAPIView.FlatListSerializer(
+            flats, many=True
+        )
+        return Response({"total_flats": total_flats, "flats": serializer.data})
 
 
 class EntranceListAPIView(APIView):
