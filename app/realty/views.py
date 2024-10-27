@@ -2,14 +2,12 @@ from rest_framework.views import APIView
 from rest_framework import serializers, status
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, inline_serializer
-from .servises import (
+from .services import (
     get_floor,
-    list_flats,
-    get_flat,
-    list_flats_on_floor,
     list_floors,
 )
 from .selectors import (
+    FlatsSelector,
     count_entities,
     count_flats_in_building,
     count_flats_in_project,
@@ -25,11 +23,10 @@ class FlatListAPIView(APIView):
     class FlatListSerializer(serializers.Serializer):
         id = serializers.IntegerField()
         number = serializers.IntegerField()
-        # area = serializers.DecimalField(max_digits=5, decimal_places=2)
         area = serializers.FloatField()
         rooms_count = serializers.IntegerField()
         wc_count = serializers.IntegerField()
-        floor_id = serializers.IntegerField(source="floor.id")
+        floor_id = serializers.IntegerField()
         status = serializers.CharField()
         description = serializers.CharField()
         created_at = serializers.DateTimeField()
@@ -50,8 +47,8 @@ class FlatListAPIView(APIView):
         tags=["Квартиры"],
     )
     def get(self, request):
-        total_flats, flats = list_flats()
-        serializer = FlatListAPIView.FlatListSerializer(flats, many=True)
+        total_flats, flats = FlatsSelector.get_all(self)
+        serializer = self.FlatListSerializer(flats, many=True)
         return Response({"total_flats": total_flats, "flats": serializer.data})
 
 
@@ -62,7 +59,7 @@ class FlatDetailAPIView(APIView):
         area = serializers.FloatField()
         rooms_count = serializers.IntegerField()
         wc_count = serializers.IntegerField()
-        floor_id = serializers.IntegerField(source="floor.id")
+        floor_id = serializers.IntegerField()
         status = serializers.CharField()
         description = serializers.CharField()
         created_at = serializers.DateTimeField()
@@ -78,9 +75,17 @@ class FlatDetailAPIView(APIView):
         tags=["Квартиры"],
     )
     def get(self, request, flat_id):
-        flat = get_flat(flat_id)
-        serializer = FlatDetailAPIView.FlatDetailSerializer(flat)
-        return Response(serializer.data)
+        flat = FlatsSelector.get_one(self, flat_id)
+        print("2" * 100)
+        print(flat)
+        print(type(flat))
+        print("2" * 100)
+        if flat:
+            serializer = FlatDetailAPIView.FlatDetailSerializer(flat)
+            return Response(serializer.data)
+        return Response(
+            {"error_message": f"Квартиры с id={flat_id} не существует."}
+        )
 
 
 class FloorListAPIView(APIView):
@@ -149,7 +154,7 @@ class FlatsOnFloorListAPIView(APIView):
         area = serializers.FloatField()
         rooms_count = serializers.IntegerField()
         wc_count = serializers.IntegerField()
-        floor_id = serializers.IntegerField(source="floor.id")
+        floor_id = serializers.IntegerField()
         status = serializers.CharField()
         description = serializers.CharField()
         created_at = serializers.DateTimeField()
@@ -161,7 +166,7 @@ class FlatsOnFloorListAPIView(APIView):
         tags=["Этажи", "Квартиры"],
     )
     def get(self, request, floor_id):
-        total_flats, flats = list_flats_on_floor(floor_id)
+        total_flats, flats = FlatsSelector.get_by_floor(self, floor_id)
         serializer = FlatsOnFloorListAPIView.FlatListSerializer(
             flats, many=True
         )

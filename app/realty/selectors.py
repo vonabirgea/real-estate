@@ -1,5 +1,6 @@
 from django.http import Http404
-from realty.models import Building, Entrance, Flat
+from .repositories import FlatRepository
+from .models import Building, Entrance, Flat
 
 
 def get_all_objects(model):
@@ -11,6 +12,26 @@ def get_object_by_pk(model, pk):
         return model.objects.get(pk=pk)
     except model.DoesNotExist:
         raise Http404
+
+
+class FlatsSelector:
+    repository = FlatRepository()
+
+    def get_all(self) -> tuple[int, list[FlatRepository.FlatData]]:
+        flats = FlatsSelector.repository.get_all()
+        num_of_flats = len(flats)
+        return num_of_flats, flats
+
+    def get_one(self, flat_id: int) -> FlatRepository.FlatData | None:
+        flat = FlatsSelector.repository.get_by_id(flat_id)
+        return flat
+
+    def get_by_floor(
+        self, floor_id: int
+    ) -> tuple[int, list[FlatRepository.FlatData]]:
+        flats = FlatsSelector.repository.get_by_floor(floor_id)
+        flats_on_floor = len(flats)
+        return flats_on_floor, flats
 
 
 def count_entities(queryset):
