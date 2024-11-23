@@ -42,10 +42,10 @@ class FloorAdmin(admin.ModelAdmin):
 
     get_entrance_by_floor.short_description = "Номер подъезда"
 
-    fields = ["floor", "flats_count", "status", "description", "created_at"]
+    fields = ["storey", "flats_count", "status", "description", "created_at"]
     readonly_fields = ["created_at"]
     list_display = [
-        "floor",
+        "storey",
         "flats_count",
         "status",
         "get_entrance_by_floor",

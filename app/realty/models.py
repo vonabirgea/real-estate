@@ -16,18 +16,6 @@ class BaseModel(models.Model):
 
 
 class Flat(BaseModel):
-    """
-    Модель квартиры
-
-    Поля модели:
-        number: int - номер квартиры в доме
-        area: float - площадь квартиры в квадратных метрах
-        rooms_count: int - число комнат в квартире
-        wc_count: int - число санузлов в квартире
-        floor: Floor - внешний ключ к этажу, накотором расположена квартира
-        status: str - статус квартиры (Доступна, Забронирована, Продана)
-        description: str - текстовое описание квартиры
-    """
 
     class StatusChoices(models.TextChoices):
         AVAILABLE = "AVL", "Доступна"
@@ -72,23 +60,12 @@ class Flat(BaseModel):
 
 
 class Floor(BaseModel):
-    """
-    Модель этажа
-
-    Поля модели:
-        floor: int - этаж
-        flats_count: int - число квартир на этаже согласно проекта
-        status: str - статус этажа
-        description: str - текстовое описание этажа
-        entrance: Entrance - внешний ключ к подъезду, в которо расположен этаж
-    """
-
     class StatusChoices(models.TextChoices):
         FREE = "FRE", "Полностью свободен"
         PARTLY = "PRT", "Частично занят"
         SOLD = "SLD", "Полностью выкуплен"
 
-    floor = models.IntegerField(verbose_name="Этаж")
+    storey = models.IntegerField(verbose_name="Этаж")
     flats_count = models.IntegerField(
         verbose_name="Число квартир на этаже", null=True
     )
@@ -107,7 +84,7 @@ class Floor(BaseModel):
     )
 
     def __str__(self):
-        return f"Этаж {self.floor} с {self.flats_count} квартирами."
+        return f"Этаж {self.storey} с {self.flats_count} квартирами."
 
     class Meta:
         verbose_name = "Этаж"
@@ -115,16 +92,6 @@ class Floor(BaseModel):
 
 
 class Entrance(BaseModel):
-    """
-    Модель подъезда
-
-    Поля модели:
-        number: int - номер подъезда в доме
-        flats_count: int - число квартир в подъезде согласно проекта
-        floors_count: int - число этажей в подъезде согласно проекта
-        building: Building - внешний ключ к зданию, в котором расположен подъезд
-    """
-
     number = models.IntegerField(verbose_name="Номер подъезда")
     flats_count = models.IntegerField(verbose_name="Общее число квартир")
     floors_count = models.IntegerField(verbose_name="Общее число этажей")
@@ -141,18 +108,6 @@ class Entrance(BaseModel):
 
 
 class Building(BaseModel):
-    """
-    Модель здания
-
-    Поля модели:
-        number: int - номер дома
-        entrances_count: int - число подъездов в доме согласно проекта
-        project: Project - внешний ключ к проекту (ЖК), которому принадлежит дом
-        max_floors: int - максимальная этажность дома, согласно проекта
-        comissioning_date: date - дата сдачи дома в эксплуатацию согласно проектной документации
-        address: str - адрес дома
-    """
-
     number = models.IntegerField(verbose_name="Номер дома (корпуса)")
     entrances_count = models.IntegerField(verbose_name="Число подъездов в доме")
     project = models.ForeignKey(
@@ -173,16 +128,6 @@ class Building(BaseModel):
 
 
 class Project(BaseModel):
-    """
-    Модель проекта (ЖК)
-
-    Поля модели:
-        name: str - название проекта (ЖК)
-        buildings_count: int - число домов в проекте согласно проектной документации
-        description: str - текстовое описание проекта
-        city: str - город, в котором расположен проект (ЖК)
-    """
-
     name = models.CharField(verbose_name="Название проекта", max_length=50)
     buildings_count = models.IntegerField(verbose_name="Число домов в проекте")
     description = models.TextField(max_length=150, verbose_name="Описание")
@@ -193,4 +138,5 @@ class Project(BaseModel):
 
     class Meta:
         verbose_name = "Проект"
+
         verbose_name_plural = "Проекты"

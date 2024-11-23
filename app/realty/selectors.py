@@ -1,71 +1,83 @@
 from django.http import Http404
-from .repositories import FlatRepository
-from .models import Building, Entrance, Flat
-
-
-def get_all_objects(model):
-    return model.objects.all()
-
-
-def get_object_by_pk(model, pk):
-    try:
-        return model.objects.get(pk=pk)
-    except model.DoesNotExist:
-        raise Http404
+from .repositories import FlatRepository, FloorRepository, EntranceRepository
+from .entities import FlatEntity, FloorEntity, EntranceEntity
 
 
 class FlatsSelector:
     repository = FlatRepository()
 
-    def get_all(self) -> tuple[int, list[FlatRepository.FlatData]]:
-        flats = FlatsSelector.repository.get_all()
+    def get_all(self) -> tuple[int, list[FlatEntity]]:
+        flats = self.repository.get_all()
+
         num_of_flats = len(flats)
         return num_of_flats, flats
 
-    def get_one(self, flat_id: int) -> FlatRepository.FlatData | None:
-        flat = FlatsSelector.repository.get_by_id(flat_id)
+    def get_one(self, flat_id: int) -> FlatEntity:
+        flat = self.repository.get_by_id(flat_id)
+        if not flat:
+            raise Http404(f"Квартиры с id={flat_id} не существует.")
         return flat
 
-    def get_by_floor(
-        self, floor_id: int
-    ) -> tuple[int, list[FlatRepository.FlatData]]:
-        flats = FlatsSelector.repository.get_by_floor(floor_id)
-        flats_on_floor = len(flats)
-        return flats_on_floor, flats
+    def get_by_entity(
+        self, entity, entity_id: int
+    ) -> tuple[int, list[FlatEntity]]:
+        flats = self.repository.get_by_entity(entity, entity_id)
+        if not flats:
+            raise Http404(
+                f"Сочетанию entity={entity} и entity_id={entity_id} не принадлежит ни одна квартира."
+            )
+        total_flats = len(flats)
+        return total_flats, flats
 
 
-def count_entities(queryset):
-    return queryset.count()
+class FloorsSelector:
+    repository = FloorRepository()
+
+    def get_all(self) -> tuple[int, list[FloorEntity]]:
+        floors = self.repository.get_all()
+
+        num_of_floors = len(floors)
+        return num_of_floors, floors
+
+    def get_one(self, floor_id: int) -> FloorEntity:
+        floor = self.repository.get_by_id(floor_id)
+        if not floor:
+            raise Http404(f"Этажа с id={floor_id} не существует.")
+        return floor
+
+    def get_by_entity(
+        self, entity: str, entity_id: int
+    ) -> tuple[int, list[FloorEntity]]:
+        floors = self.repository.get_by_entity(entity, entity_id)
+        if not floors:
+            raise Http404(
+                f"Сочетанию entity={entity} и entity_id={entity_id} не принадлежит ни один этаж."
+            )
+        total_floors = len(floors)
+        return total_floors, floors
 
 
-def get_flats_by_building(building_id):
-    return Flat.objects.select_related("floor__entrance__building").filter(
-        floor__entrance__building_id=building_id
-    )
+class EntrancesSelector:
+    repository = EntranceRepository()
 
+    def get_all(self) -> tuple[int, list[EntranceEntity]]:
+        entrances = self.repository.get_all()
+        num_of_entrances = len(entrances)
+        return num_of_entrances, entrances
 
-def count_flats_in_building(building_id):
-    entrances = Entrance.objects.select_related("building").filter(
-        building_id=building_id
-    )
-    total_flats_in_building = 0
-    for entrance in entrances:
-        total_flats_in_building += entrance.flats_count
-    return total_flats_in_building
+    def get_one(self, entrance_id: int) -> EntranceEntity:
+        entrance = self.repository.get_by_id(entrance_id)
+        if not entrance:
+            raise Http404(f"Подъезда с id={entrance_id} не существует.")
+        return entrance
 
-
-def get_buildings_by_project(project_id):
-    buildings = Building.objects.select_related("project").filter(
-        project_id=project_id
-    )
-    return buildings
-
-
-def count_flats_in_project(project_id):
-    entrances = Entrance.objects.select_related("building__project").filter(
-        building__project_id=project_id
-    )
-    total_flats = 0
-    for entrance in entrances:
-        total_flats += entrance.flats_count
-    return total_flats
+    def get_by_entity(
+        self, entity: str, entity_id: int
+    ) -> tuple[int, list[EntranceEntity]]:
+        entrances = self.repository.get_by_entity(entity, entity_id)
+        if not entrances:
+            raise Http404(
+                f"Сочетанию entity={entity} и entity_id={entity_id} не соответствует ни один подъезд"
+            )
+        total_entrances = len(entrances)
+        return total_entrances, entrances
