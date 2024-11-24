@@ -1,6 +1,18 @@
 from django.http import Http404
-from .repositories import FlatRepository, FloorRepository, EntranceRepository
-from .entities import FlatEntity, FloorEntity, EntranceEntity
+from .repositories import (
+    FlatRepository,
+    FloorRepository,
+    EntranceRepository,
+    BuildingRepository,
+    ProjectRepository,
+)
+from .entities import (
+    FlatEntity,
+    FloorEntity,
+    EntranceEntity,
+    BuildingEntity,
+    ProjectEntity,
+)
 
 
 class FlatsSelector:
@@ -81,3 +93,44 @@ class EntrancesSelector:
             )
         total_entrances = len(entrances)
         return total_entrances, entrances
+
+
+class BuildingsSelector:
+    repository = BuildingRepository()
+
+    def get_all(self) -> tuple[int, list[BuildingEntity]]:
+        buildings = self.repository.get_all()
+        num_of_buildings = len(buildings)
+        return num_of_buildings, buildings
+
+    def get_one(self, building_id: int) -> BuildingEntity:
+        building = self.repository.get_by_id(building_id)
+        if not building:
+            raise Http404(f"Здания с id={building_id} не существует.")
+        return building
+
+    def get_by_entity(
+        self, entity: str, entity_id: int
+    ) -> tuple[int, list[BuildingEntity]]:
+        buildings = self.repository.get_by_entity(entity, entity_id)
+        if not buildings:
+            raise Http404(
+                f"Сочетанию entity={entity} и entity_id={entity_id} не соответствует ни одно здание."
+            )
+        num_of_buildings = len(buildings)
+        return num_of_buildings, buildings
+
+
+class ProjectsSelector:
+    repository = ProjectRepository()
+
+    def get_all(self) -> tuple[int, list[ProjectEntity]]:
+        projects = self.repository.get_all()
+        num_of_projects = len(projects)
+        return num_of_projects, projects
+
+    def get_one(self, project_id: int) -> ProjectEntity:
+        project = self.repository.get_by_id(project_id)
+        if not project:
+            raise Http404(f"Проекта с id={project_id} не существует.")
+        return project

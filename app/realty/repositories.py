@@ -1,5 +1,11 @@
 from realty.models import Flat, Floor, Entrance, Building, Project
-from realty.entities import FlatEntity, FloorEntity, EntranceEntity
+from realty.entities import (
+    FlatEntity,
+    FloorEntity,
+    EntranceEntity,
+    BuildingEntity,
+    ProjectEntity,
+)
 
 
 class FlatRepository:
@@ -191,3 +197,97 @@ class EntranceRepository:
             for entrance in entrances
         ]
         return list_of_entrances
+
+
+class BuildingRepository:
+    def get_all(self) -> list[BuildingEntity]:
+        all_buildings = Building.objects.select_related("project")
+        list_of_buildings = [
+            BuildingEntity(
+                id=building.id,
+                number=building.number,
+                entrances_count=building.entrances_count,
+                project_id=building.project_id,
+                max_floors=building.max_floors,
+                commissioning_date=building.commissioning_date,
+                address=building.address,
+                created_at=building.created_at,
+                last_update=building.last_update,
+            )
+            for building in all_buildings
+        ]
+        return list_of_buildings
+
+    def get_by_id(self, building_id: int) -> BuildingEntity | None:
+        building = Building.objects.filter(pk=building_id).first()
+        if building:
+            one_building = BuildingEntity(
+                id=building.id,
+                number=building.number,
+                entrances_count=building.entrances_count,
+                project_id=building.project_id,
+                max_floors=building.max_floors,
+                commissioning_date=building.commissioning_date,
+                address=building.address,
+                created_at=building.created_at,
+                last_update=building.last_update,
+            )
+            return one_building
+        return None
+
+    def get_by_entity(
+        self, entity: str, entity_id: int
+    ) -> list[BuildingEntity] | None:
+        query = Building.objects
+        if entity.lower() == "project":
+            buildings = query.filter(project_id=entity_id)
+        else:
+            return None
+        list_of_buildings = [
+            BuildingEntity(
+                id=building.id,
+                number=building.number,
+                entrances_count=building.entrances_count,
+                project_id=building.project_id,
+                max_floors=building.max_floors,
+                commissioning_date=building.commissioning_date,
+                address=building.address,
+                created_at=building.created_at,
+                last_update=building.last_update,
+            )
+            for building in buildings
+        ]
+        return list_of_buildings
+
+
+class ProjectRepository:
+    def get_all(self) -> list[ProjectEntity]:
+        projects = Project.objects.all()
+        list_of_projects = [
+            ProjectEntity(
+                id=project.id,
+                name=project.name,
+                buildings_count=project.buildings_count,
+                description=project.description,
+                city=project.city,
+                created_at=project.created_at,
+                last_update=project.last_update,
+            )
+            for project in projects
+        ]
+        return list_of_projects
+
+    def get_by_id(self, project_id: int) -> ProjectEntity | None:
+        project = Project.objects.filter(pk=project_id).first()
+        if project:
+            one_project = ProjectEntity(
+                id=project.id,
+                name=project.name,
+                buildings_count=project.buildings_count,
+                description=project.description,
+                city=project.city,
+                created_at=project.created_at,
+                last_update=project.last_update,
+            )
+            return one_project
+        return None

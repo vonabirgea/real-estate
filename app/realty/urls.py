@@ -1,13 +1,14 @@
 from django.urls import path
 
 from .views import (
-    # ProjectDetailAPIView,
-    # ProjectListAPIView,
-    # BuildingDetailAPIView,
-    # BuildingListAPIView,
+    ProjectDetailAPIView,
+    ProjectListAPIView,
+    BuildingDetailAPIView,
+    BuildingListAPIView,
+    BuildingListByEntityAPIView,
     EntranceDetailAPIView,
     EntranceListAPIView,
-    EntrancesListByEntityAPIView,
+    EntranceListByEntityAPIView,
     FloorDetailAPIView,
     FloorListAPIView,
     FloorListByEntityAPIView,
@@ -33,10 +34,14 @@ urlpatterns = [
     path("entrances/", EntranceListAPIView.as_view()),
     path(
         "<str:entity>/<int:entity_id>/entrances",
-        EntrancesListByEntityAPIView.as_view(),
+        EntranceListByEntityAPIView.as_view(),
     ),
-    # path("buildings/<int:building_id>/", BuildingDetailAPIView.as_view()),
-    # path("buildings/", BuildingListAPIView.as_view()),
-    # path("projects/<int:project_id>/", ProjectDetailAPIView.as_view()),
-    # path("projects/", ProjectListAPIView.as_view()),
+    path("buildings/<int:building_id>/", BuildingDetailAPIView.as_view()),
+    path("buildings/", BuildingListAPIView.as_view()),
+    path(
+        "<str:entity>/<int:entity_id>/buildings/",
+        BuildingListByEntityAPIView.as_view(),
+    ),
+    path("projects/<int:project_id>/", ProjectDetailAPIView.as_view()),
+    path("projects/", ProjectListAPIView.as_view()),
 ]
