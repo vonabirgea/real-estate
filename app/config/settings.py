@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     "debug_toolbar",
     "rest_framework",
     "drf_spectacular",
+    "django_extensions",
     "realty.apps.RealtyConfig",
 ]
 
@@ -103,3 +104,6 @@ SPECTACULAR_SETTINGS = {
     поплачьте о том, что стоит она ебанистических денег.""",
     "VERSION": "0.0.1",
 }
+
+MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_URL = "/media/"
